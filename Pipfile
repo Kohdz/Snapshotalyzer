@@ -10,6 +10,7 @@ autopep8 = "*"
 
 [packages]
 boto3 = "*"
+click = "*"
 
 [requires]
 python_version = "3.8"
