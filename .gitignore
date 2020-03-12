@@ -1,2 +1,6 @@
 Pipfile.lock
 .vscode
+build/
+dist/
+snaps
+/snapshotalyzer.egg-info

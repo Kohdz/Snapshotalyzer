@@ -27,3 +27,14 @@ create snapshot: 'python shotty/shotty.py instances snapshot list
 create snapshot: 'python shotty/shotty.py instances snapshot list --all
 
 creating snapshots: - go to instances - select the inntaces - click Actions, choose Instance State and select stop - after a few minuets, reselect the instance - find root device, hover over it and clic EBSID (voluem) - then click action and select "create snapshot"
+
+distrubution file for script
+user can install on their machine
+python package called setup tools; setup.py file
+
+a distrubutable package that users can install and get a script
+
+snapshotalyzer distrubution wheel hosted in AWS S3 bucket
+
+to install using dist wheel:
+pip install <URL>
