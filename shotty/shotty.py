@@ -19,6 +19,12 @@ def filter_instances(project):
 
     return instances
 
+
+def has_pending_snapshot(volume):
+    snapshots = list(volume.snapshots.all())
+    return snapshots and snapshots[0].state == 'pending'
+
+
 # we are using a decorator
 # we are handing our function to click
 # click gives error if we run our project in and unexpected way
@@ -106,6 +112,10 @@ def create_snapshots(projects):
         i.stop()
         i.wait_untill_stopped()
         for v in i.volumes.all():
+            if has_pending_snapshot(v):
+                print(
+                    " skipping {0}, snaphot already in progress".format(v.id))
+                continue
             print("  Creating snapshot of {0}".format(v.id))
             v.create_snapshot(Description="Created by Snapshotlyzer")
         print("Starting {0}...".format(i.id))
