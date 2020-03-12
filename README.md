@@ -16,6 +16,11 @@ shotty uses the configuration file created by the AWS cli. e.g.
 
 `pipenv run "python shotty/shotty.py <command> <subcommand> <--project=PROJECT>"`
 
-*command* is instances, volumes, or snapshots
-*subcommand* - depends on command
-*project* is optional
+_command_ is instances, volumes, or snapshots
+_subcommand_ - depends on command
+_project_ is optional
+
+list instances: 'python shotty/shottty.py instanes start'
+list volumes: 'python shotty/shotty.py volumes list
+
+creating snapshots: - go to instances - select the inntaces - click Actions, choose Instance State and select stop - after a few minuets, reselect the instance - find root device, hover over it and clic EBSID (voluem) - then click action and select "create snapshot"
