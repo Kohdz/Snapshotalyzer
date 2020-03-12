@@ -23,5 +23,7 @@ _project_ is optional
 list instances: 'python shotty/shottty.py instanes start'
 list volumes: 'python shotty/shotty.py volumes list
 create snapshot: 'python shotty/shotty.py instances snapshot --project valkrie'
+create snapshot: 'python shotty/shotty.py instances snapshot list
+create snapshot: 'python shotty/shotty.py instances snapshot list --all
 
 creating snapshots: - go to instances - select the inntaces - click Actions, choose Instance State and select stop - after a few minuets, reselect the instance - find root device, hover over it and clic EBSID (voluem) - then click action and select "create snapshot"
