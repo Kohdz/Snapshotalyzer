@@ -50,6 +50,8 @@ Here is the process one has to go through to make a `snapshot`:
     7. Click the action button again and select "create snapshot"
     8. Once complete, restart the instances
 
+As you can see, the steps above are quite involved. Thus this command line utility was created to easily handle these multi-stepped processes.
+
 ## Sample Commands:
 
 list instances: `python shotty/shottty.py instanes start`
