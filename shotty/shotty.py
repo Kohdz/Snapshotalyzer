@@ -53,15 +53,15 @@ def list_snapshots(project, list_all):
 
     for i in instances:
         for v in i.volumes.all():
-            for s in v.snapshots.all()
-            print(", ".join((
-                s.id,
-                v.id,
-                i.id,
-                s.state,
-                s.progrss,
-                s.start_time.strftime('%c')
-            )))
+            for s in v.snapshots.all():
+                print(", ".join((
+                    s.id,
+                    v.id,
+                    i.id,
+                    s.state,
+                    s.progrss,
+                    s.start_time.strftime('%c')
+                )))
 
             if s.state == 'completed' and not list_all:
                 break
@@ -74,7 +74,7 @@ def volumes():
     ''' Commands for volumes'''
 
 
-@volumes.commands('list')
+@volumes.command('list')
 @click.option('--project', default=None,
               help="Only volumes for project (tag Project:<name>)")
 def list_volumes(project):
@@ -89,7 +89,7 @@ def list_volumes(project):
                 i.id,
                 v.state,
                 str(v.size) + 'GiB',
-                v.encrypted and "Encrypted" of "Not Encrypted"
+                v.encrypted and "Encrypted" or "Not Encrypted"
             )))
     return
 
@@ -98,7 +98,7 @@ def list_volumes(project):
 def instances():
     """ Commands for instances"""
 
-@instances.commadn('snapshot',
+@instances.command('snapshot',
                    help='Create snapshots of all volumes')
 @click.option('--project', default=None,
               help="Only instances for project (tag Project:<name>)")
