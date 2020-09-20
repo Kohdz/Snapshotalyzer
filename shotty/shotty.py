@@ -1,16 +1,15 @@
 import boto3
 import click
-import botocore
 
-
-# session = boto3.session(profile_name='shotty')
-session = boto3.Session.resource(profile_name='shotty')
+session = boto3.Session(profile_name='shotty')
 ec2 = session.resource('ec2')
 
+# helper function to filter instances
 
-# helper function to filterinstances
+
 def filter_instances(project):
     instances = []
+
     if project:
         filters = [{'Name': 'tag:Project', 'Values': [project]}]
         instances = ec2.instances.filter(Filters=filters)
@@ -29,8 +28,6 @@ def has_pending_snapshot(volume):
 # we are handing our function to click
 # click gives error if we run our project in and unexpected way
 # also, if we use --help, it returns a help option
-
-
 @click.group()
 def cli():
     """Shotty manages snapshots"""
@@ -38,14 +35,14 @@ def cli():
 
 @cli.group('snapshots')
 def snapshots():
-    ''' Commands for snapshots'''
+    """Command for snapshots"""
 
 
-@snapshots.commands('list')
+@snapshots.command('list')
 @click.option('--project', default=None,
               help="Only snapshots for project (tag Project:<name>)")
-@click.options('-all', 'list _all', default=False, is_flag=True,
-               help="List all snapshots for each volume, not just the most recent")
+@click.option('-all', 'list _all', default=False, is_flag=True,
+              help="List all snapshots for each volume, not just the most recent")
 def list_snapshots(project, list_all):
     "list EC2 snapshots"
 
@@ -59,26 +56,24 @@ def list_snapshots(project, list_all):
                     v.id,
                     i.id,
                     s.state,
-                    s.progrss,
-                    s.start_time.strftime('%c')
+                    s.progress,
+                    s.start_time.strftime("%c")
                 )))
-
             if s.state == 'completed' and not list_all:
                 break
-
     return
 
 
 @cli.group('volumes')
 def volumes():
-    ''' Commands for volumes'''
+    """Commands for volumes"""
 
 
 @volumes.command('list')
 @click.option('--project', default=None,
-              help="Only volumes for project (tag Project:<name>)")
+              help="Only instances for project (tag Project:<name>)")
 def list_volumes(project):
-    "list EC2 volumes"
+    "List EC2 volumes"
 
     instances = filter_instances(project)
 
@@ -88,50 +83,71 @@ def list_volumes(project):
                 v.id,
                 i.id,
                 v.state,
-                str(v.size) + 'GiB',
+                str(v.size) + "GiB",
                 v.encrypted and "Encrypted" or "Not Encrypted"
             )))
+
     return
 
 
 @cli.group('instances')
 def instances():
-    """ Commands for instances"""
+    """Commands for instances"""
+
+
+@instances.command('reboot')
+@click.option('--project', default=None,
+              help="Only reboot instances for project (tag Project:<name>)")
+def reboot_ec2s(project):
+    "Reboot instances"
+
+    instances = filter_instances(project)
+
+    for i in instances:
+        print("Rebooting{0}...".format(i.id))
+        i.reboot()
+    return
+
 
 @instances.command('snapshot',
-                   help='Create snapshots of all volumes')
+                   help="Create snapshots of all volumes")
 @click.option('--project', default=None,
               help="Only instances for project (tag Project:<name>)")
-def create_snapshots(projects):
+def create_snapshots(project):
     "Create snapshots for EC2 instances"
 
     instances = filter_instances(project)
 
     for i in instances:
         print("Stopping {0}...".format(i.id))
+
         i.stop()
-        i.wait_untill_stopped()
+        i.wait_until_stopped()
+
         for v in i.volumes.all():
-            if has_pending_snapshot(v):
-                print(
-                    " skipping {0}, snaphot already in progress".format(v.id))
+            for v in i.volumes.all():
+                if has_pending_snapshot(v):
+                    print(
+                        " skipping {0}, snaphot already in progress".format(v.id))
                 continue
-            print("  Creating snapshot of {0}".format(v.id))
-            v.create_snapshot(Description="Created by Snapshotlyzer")
+            print("Creating snapshot of {0}".format(v.id))
+            v.create_snapshot(Description="Created by Snapshotalyzer 30000")
+
         print("Starting {0}...".format(i.id))
+
         i.start()
-        i.wait_untill_running()
+        i.wait_until_running()
+
     print("Job's done!")
+
     return
 
 
-@click.options()
-@instances.commands('list')
+@instances.command('list')
 @click.option('--project', default=None,
               help="Only instances for project (tag Project:<name>)")
 def list_instances(project):
-    "list EC2 instances"
-
+    "List EC2 instances"
     instances = filter_instances(project)
 
     for i in instances:
@@ -139,23 +155,24 @@ def list_instances(project):
         # boto3 tags are lists of dictionaries, following
         # following logic uses dictionary comprehesion to
         # convert list of dictionaries to dictionaries
-        tags = {t['key']: t['Value'] for t in i.tags or []}
+        tags = {t['Key']: t['Value'] for t in i.tags or []}
         print(', '.join((
             i.id,
             i.instance_type,
             i.placement['AvailabilityZone'],
             i.state['Name'],
-            i.public_dsn_name,
-            tags.get('Project', '<no project>'))))
-
+            i.public_dns_name,
+            tags.get('Project', '<no project>')
+        )))
     return
 
-# stops instances
+
 @instances.command('stop')
 @click.option('--project', default=None,
               help='Only instances for project')
 def stop_instances(project):
     "Stop EC2 instances"
+
     instances = filter_instances(project)
 
     for i in instances:
@@ -168,16 +185,17 @@ def stop_instances(project):
 
     return
 
-# starts instances
+
 @instances.command('start')
 @click.option('--project', default=None,
               help='Only instances for project')
-def start_instances(project):
-    "Starting EC2 instances"
+def stop_instances(project):
+    "Start EC2 instances"
+
     instances = filter_instances(project)
 
     for i in instances:
-        print("starting {0}..".format(i.id))
+        print("Starting {0}...".format(i.id))
         try:
             i.start()
         except botocore.exceptions.ClientError as e:
